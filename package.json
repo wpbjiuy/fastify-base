@@ -1,0 +1,26 @@
+{
+  "name": "serve",
+  "version": "1.0.0",
+  "description": "",
+  "main": "serve.js",
+  "scripts": {
+    "init": "node src/init.js",
+    "start": "node src/serve.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "ajv-i18n": "^3.6.0",
+    "crypto-js": "^4.0.0",
+    "fastify": "^3.9.2",
+    "fastify-mongodb": "^2.0.1",
+    "fastify-plugin": "^3.0.0",
+    "pino-pretty": "^4.3.0",
+    "vary": "^1.1.2"
+  },
+  "devDependencies": {
+    "fastify-secure-session": "^2.3.0"
+  }
+}
