@@ -13,14 +13,20 @@ const baseAuthPath = [
 ]
 
 const AllPath = [
-  ...baseAuthPath,
+  ...baseAuthPath
 
   // sytem
-  '/createSystemUser',
-  '/getSystem',
+  ,'/createSystemUser'
+  ,'/getSystem'
 
   // user
-  '/user/get'
+  ,'/user/get'
+
+  // test
+  ,'/test/get'
+  ,'/test/create'
+  ,'/test/update'
+  ,'/test/delete'
 ]
 
 const roleAutPath = {

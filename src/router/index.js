@@ -8,7 +8,8 @@ async function routes (fastify, options) {
   fastify.register(publicRouter, {
     prefix: '/test',
     collection: 'test_collection',
-    ...testSchemas
+    ...testSchemas,
+    auth: false
   })
 }
 

@@ -16,13 +16,15 @@ function addHas(data) {
 }
 
 const test = async () => {
-  const app = build()
+  const app = build({
+    ajv: require('./plugins/ajv-options')
+  })
 
   const response = await app.inject({
-    method: 'put',
-    url: '/test/updateById',
-    query: { id: '6004f89194567c4b90ba190a' },
-    body: { name: '测试Id', mobile: 15219998811, birthday: new Date('2021-02-18') }
+    method: 'post',
+    url: '/test/create',
+    // query: { id: '6004f89194567c4b90ba190a' },
+    body: { name: 'aa', mobile: 15219998811, padd: 1223, hsd: 'ddes' }
   })
 
   console.log('status code: ', response.statusCode)

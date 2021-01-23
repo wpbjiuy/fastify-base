@@ -13,9 +13,11 @@ const stringFz = {
 const DataSchema = {
   type: 'object',
   required: ['name', 'mobile'],
+  additionalProperties: false,  // 去除额外的属性
   properties: {
     name: {
-      type: 'string'
+      type: 'string',
+      minLength: 2
     },
     mobile: {
       type: 'string',
@@ -24,9 +26,11 @@ const DataSchema = {
     },
     birthday: {
       type: 'string',
-      format: 'date-time',
-      max: new Date(),
-      default: new Date()
+      format: 'date',
+      // dateRange: true,
+      minDate: new Date('2020-01-01'),
+      maxDate: new Date(),
+      default: new Date().toLocaleDateString().replace(/\//g, '-').replace(/-(?!\d\d)/g, '$&0')
     }
   }
 }
@@ -37,11 +41,11 @@ const AllSchema = {
     _id: {
       type: 'string'
     },
-    ...{ ...DataSchema.properties, birthday: {
-      type: 'string',
-      format: 'date-time',
-      max: new Date()
-    }}
+    ...DataSchema.properties,
+    birthday: {
+      ...DataSchema.properties.birthday,
+      default: undefined
+    }
   }
 }
 
