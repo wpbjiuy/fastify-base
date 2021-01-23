@@ -6,7 +6,7 @@
   "scripts": {
     "init": "node src/init.js",
     "start": "node src/serve.js",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "node src/app.test.js"
   },
   "keywords": [],
   "author": "",
