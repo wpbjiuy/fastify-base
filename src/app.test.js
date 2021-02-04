@@ -7,7 +7,14 @@ let key = '1234567812122312'
 let iv = '1234567890123456'
 let cryptojs = require('crypto-js')
 
-function addHas(data) {
+const getUUID = () => {
+  return 'xxxx-xxxx-xxxx-xxxx'.replace(/[xy]/g, function(c) {
+      var r = Math.random()*16|0, v = c == 'x' ? r : (r&0x3|0x8);
+      return v.toString(16);
+  });
+}
+
+function addHas(data, key, iv) {
   return cryptojs.AES.encrypt(data, cryptojs.enc.Utf8.parse(key), {
     iv: cryptojs.enc.Utf8.parse(iv),
     mode: cryptojs.mode.CBC,
@@ -22,9 +29,9 @@ const test = async () => {
 
   const response = await app.inject({
     method: 'post',
-    url: '/test/create',
+    url: '/mail/captcha',
     // query: { id: '6004f89194567c4b90ba190a' },
-    body: { name: 'aa', mobile: 15219998811, padd: 1223, hsd: 'ddes' }
+    body: { mail: 'wpbjiuy@163.com' }
   })
 
   console.log('status code: ', response.statusCode)
@@ -56,15 +63,21 @@ const testAddLogin = async () => {
 
 const testUserLogin = async () => {
   const app = build()
+  const aes = getUUID()
+  const key = aes.replace(/-/g, '')
+  const iv = key.replace(/-/g, aes.charAt(0)).slice(0, 16);
 
   const body = {
-    name: addHas('admin'),
-    password: addHas('123456')
+    name: addHas('admin', key, iv),
+    password: addHas('12345612', key, iv)
   }
   const response = await app.inject({
     method: 'post',
     url: '/login',
-    body
+    body,
+    headers: {
+      aes
+    }
   })
 
   console.log('status code: ', response.statusCode)

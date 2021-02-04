@@ -13,9 +13,15 @@ const NOT_AUTHENTICATION = {
   code: '1006',
   msg: '身份校验不通过，请重新登录'
 }
+const NOT_CAPTCHA = {
+  statusCode: '405',
+  code: '1005',
+  msg: '验证码错误'
+}
 
 module.exports = {
   NOT_QUERY,
   NOT_UPDTE,
-  NOT_AUTHENTICATION
+  NOT_AUTHENTICATION,
+  NOT_CAPTCHA
 }

@@ -1,9 +1,21 @@
 const crypto = require('crypto')
+const svgCaptcha = require('svg-captcha')
 const UserSchema = require('../schemas/user-schema')
 
-const { NOT_QUERY } = require('../data/errtxt')
+const { NOT_QUERY, NOT_CAPTCHA } = require('../data/errtxt')
 
 const algorithm = 'aes-128-cbc'
+
+const codeConfig = {
+  size: 4, // 验证码长度
+  ignoreChars: '0oO1ilI', // 验证码字符中排除 0oO1ilI
+  noise: 2, // 干扰线条的数量
+  width: 160,
+  height: 50,
+  fontSize: 50,
+  color: true, // 验证码的字符是否有颜色，默认没有，如果设定了背景，则默认有
+  background: '#eee'
+};
 
 function hash(data, key) {
   return crypto.createHmac('sha256', key).update(data).digest('hex')
@@ -38,6 +50,16 @@ async function routes (fastify, options) {
   // 添加登录权限
   fastify.register(require('../hook/authority'))
 
+  // 获取验证吗
+  fastify.get('/getCaptcha', async (request, replay) => {
+    const captcha = svgCaptcha.create(codeConfig)
+    // 存session用于验证接口获取文字码
+    request.session.set('verifyCode', captcha.text.toLowerCase())
+    // request.session.options({ maxAge: 1 })
+    replay.type('image/svg+xml')
+    return captcha.data;
+  })
+
   fastify.post('/createSystemUser', { schema: { ...UserSchema.postOkSchema } }, async (request, reply) => {
     const body = resUserData(request.body)
     body.role = 'D';
@@ -45,7 +67,19 @@ async function routes (fastify, options) {
     return result && result.ops && result.ops[0]
   })
 
-  fastify.post('/login', { schema: { ...UserSchema.loginResPonseSchema } }, async (request, reply) => {
+  fastify.post('/login', { 
+    schema: { ...UserSchema.loginResPonseSchema },
+    async onError(request, reply, error) {
+      request.session.set('isVfyCode', true)
+      return error
+    }
+  }, async (request, reply) => {
+    const verifyCode = request.session.get('verifyCode')
+    const isVfyCode = request.session.get('isVfyCode')
+    // console.log('verifyCode', verifyCode, request.body.captcha.toLowerCase(), isVfyCode)
+    if (isVfyCode && (!verifyCode || !request.body.captcha || verifyCode !== request.body.captcha.toLowerCase())) {
+      throw new Error(NOT_CAPTCHA.code)
+    }
     const { key, iv } = getKv(request.headers.aes)
     const body = resUserData(request.body, key, iv)
     const result = await collection.findOne(body)
@@ -89,6 +123,15 @@ async function routes (fastify, options) {
       throw new Error(NOT_QUERY.code)
     }
     return result.value
+  })
+
+  // 获取会话的状态
+  fastify.get('/currentTypes', async (request, reply) => {
+    const st = request.session.get()
+    return {
+      isFirstLogin: st.isVfyCode,
+      isMayMail: !!st.mailCaptcha
+    }
   })
 }
 

@@ -4,6 +4,7 @@ const publicRouter = require('./public-router')
 async function routes (fastify, options) {
 
   fastify.register(require('./system-router'))
+  fastify.register(require('./mail-router'), {prefix: '/mail'})
   fastify.register(require('./user-router'), {prefix: '/user'})
   fastify.register(publicRouter, {
     prefix: '/test',

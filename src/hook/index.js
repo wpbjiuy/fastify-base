@@ -4,11 +4,11 @@ const append = require('vary').append
 async function hook(fastify, options) {
   fastify.addHook('onRequest', async (req, reply) => {
     // 其他代码
-    req.log.info({ url: req.raw.url, id: req.id }, '已请求')
+    req.log.info({ url: req.raw.url, id: req.id, query: req.query }, '已请求')
   })
 
   fastify.addHook('onResponse', async (req, reply) => {
-    req.log.info({ url: req.raw.originalUrl, statusCode: reply.raw.statusCode }, '已响应')
+    req.log.info({ url: req.raw.originalUrl, statusCode: reply.raw.statusCode, reqBody: req.body }, '已响应')
   })
   
   
