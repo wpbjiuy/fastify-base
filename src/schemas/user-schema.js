@@ -1,9 +1,9 @@
 // 登录信息
 const LoginSchema = {
   type: 'object',
-  required: ['name', 'password'],
+  required: ['username', 'password'],
   properties: {
-    name: {
+    username: {
       type: 'string',
       minLength: 3,
       maxLength: 100

@@ -40,19 +40,25 @@ const test = async () => {
   app.close()
 }
 
-test()
+// test()
 
 const testAddLogin = async () => {
   const app = build()
+  const aes = getUUID()
+  const key = aes.replace(/-/g, '')
+  const iv = key.replace(/-/g, aes.charAt(0)).slice(0, 16);
 
   const body = {
-    name: addHas('admin'),
-    password: addHas('123456')
+    username: addHas('admin', key, iv),
+    password: addHas('admin', key, iv)
   }
   const response = await app.inject({
     method: 'post',
-    url: '/login/create',
-    body
+    url: '/createSystemUser',
+    body,
+    headers: {
+      aes
+    }
   })
 
   console.log('status code: ', response.statusCode)
@@ -128,7 +134,7 @@ const testUpdateUser = async (id) => {
 
 // testUpdateUser('5ff5242fd377ca6dfc0c1acc')
 
-// testAddLogin()
+testAddLogin()
 
 // testUserLogin()
 

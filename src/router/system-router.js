@@ -2,7 +2,7 @@ const crypto = require('crypto')
 const svgCaptcha = require('svg-captcha')
 const UserSchema = require('../schemas/user-schema')
 
-const { NOT_QUERY, NOT_CAPTCHA } = require('../data/errtxt')
+const { NOT_QUERY, NOT_CAPTCHA, NOT_USERNAME, NOT_PASSWORD } = require('../data/errtxt')
 
 const algorithm = 'aes-128-cbc'
 
@@ -31,7 +31,7 @@ function decrypt(algorithm, key, iv, data) {
 
 function resUserData(data, key, iv) {
   return {
-    name: decrypt(algorithm, key, iv, data.name),
+    username: decrypt(algorithm, key, iv, data.username),
     password: hash(decrypt(algorithm, key, iv, data.password), 'wpb')
   }
 }
@@ -45,7 +45,7 @@ function getKv(aes) {
 async function routes (fastify, options) {
   const collection = fastify.mongo.db.collection('test_login')
 
-  collection.createIndex({name: 1}, {unique: true})
+  collection.createIndex({username: 1}, {unique: true})
 
   // 添加登录权限
   fastify.register(require('../hook/authority'))
@@ -61,7 +61,8 @@ async function routes (fastify, options) {
   })
 
   fastify.post('/createSystemUser', { schema: { ...UserSchema.postOkSchema } }, async (request, reply) => {
-    const body = resUserData(request.body)
+    const { key, iv } = getKv(request.headers.aes)
+    const body = resUserData(request.body, key, iv)
     body.role = 'D';
     const result = await collection.insertOne(body).catch(err => err)
     return result && result.ops && result.ops[0]
@@ -82,9 +83,13 @@ async function routes (fastify, options) {
     }
     const { key, iv } = getKv(request.headers.aes)
     const body = resUserData(request.body, key, iv)
-    const result = await collection.findOne(body)
+    let result = await collection.findOne({username: body.username})
     if (!result) {
-      throw new Error(NOT_QUERY.code)
+      throw new Error(NOT_USERNAME.code)
+    }
+    result = await collection.findOne(body)
+    if (!result) {
+      throw new Error(NOT_PASSWORD.code)
     }
     request.session.set('user', result)
     request.session.options({ maxAge: 60 })
@@ -117,7 +122,8 @@ async function routes (fastify, options) {
     }
   }, async (request, reply) => {
     const _id = fastify.mongo.ObjectId(request.query.id)
-    const body = resUserData(request.body)
+    const { key, iv } = getKv(request.headers.aes)
+    const body = resUserData(request.body, key, iv)
     const result = await collection.findOneAndUpdate({ _id }, { $set: body })
     if (!result) {
       throw new Error(NOT_QUERY.code)

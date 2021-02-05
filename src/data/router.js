@@ -1,7 +1,7 @@
 // 不需要登录的路由
 exports.notAuthPath = [
   '/login',
-  '/createSystem',
+  '/createSystemUser',
   '/getCaptcha'
 ]
 
@@ -10,7 +10,7 @@ const baseAuthPath = [
   '/logout',
   '/getCaptcha',
   '/systemUserUpdate',
-  '/user/create',
+  '/createSystemUser',
   '/user/current'
 ]
 
